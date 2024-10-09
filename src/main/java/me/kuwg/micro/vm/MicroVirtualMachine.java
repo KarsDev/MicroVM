@@ -14,8 +14,8 @@ import static me.kuwg.micro.util.OperationUtil.*;
 
 public class MicroVirtualMachine {
     private transient final Bytecode bytecode;
-    private transient final MicroRegisters registers;
-    private transient final MicroMemory memory;
+    private transient final VirtualMemory registers;
+    private transient final VirtualMemory memory;
 
     private transient final Map<Byte, Integer> locToReaderMap;
 
@@ -24,8 +24,8 @@ public class MicroVirtualMachine {
 
     public MicroVirtualMachine(int bcl, int mem, int reg) {
         this.bytecode = new Bytecode(bcl);
-        this.memory = new MicroMemory(mem);
-        this.registers = new MicroRegisters(reg);
+        this.memory = new VirtualMemory(mem);
+        this.registers = new VirtualMemory(reg);
 
         this.locToReaderMap = new HashMap<>();
 
@@ -45,35 +45,35 @@ public class MicroVirtualMachine {
     private void iLoad() {
         byte pointer = readByte(); // register to load into
         Object value = readValue();
-        registers.load(value, pointer);
+        registers.store(pointer, value);
     }
 
     private void iAdd() {
         final Object left = readValue();
         final Object right = readValue();
         final byte pointer = readByte();
-        registers.load(add(left, right), pointer);
+        registers.store(pointer, add(left, right));
     }
 
     private void iSub() {
         final Object left = readValue();
         final Object right = readValue();
         final byte pointer = readByte();
-        registers.load(sub(left, right), pointer);
+        registers.store(pointer, sub(left, right));
     }
 
     private void iMul() {
         final Object left = readValue();
         final Object right = readValue();
         final byte pointer = readByte();
-        registers.load(mul(left, right), pointer);
+        registers.store(pointer, mul(left, right));
     }
 
     private void iDiv() {
         final Object left = readValue();
         final Object right = readValue();
         final byte pointer = readByte();
-        registers.load(div(left, right), pointer);
+        registers.store(pointer, div(left, right));
     }
 
     private void iHalt() {
@@ -148,14 +148,34 @@ public class MicroVirtualMachine {
         byte pointer = readByte();
         byte register = readByte();
         Object result = memory.load(pointer);
-        registers.load(result, register);
+        registers.store(register, result);
+    }
+
+    private void iJIT() {
+        boolean eq = readBoolValue();
+
+        byte jump = readByte();
+
+        if (eq) {
+            bytecode.readerIndex(locToReaderMap.get(jump));
+        }
+    }
+
+    private void iJIF() {
+        boolean eq = readBoolValue();
+
+        byte jump = readByte();
+
+        if (!eq) {
+            bytecode.readerIndex(locToReaderMap.get(jump));
+        }
     }
 
     public Object readValue() {
         final byte dType = readByte();
 
         if (dType == REGISTER) {
-            return registers.get(readByte());
+            return registers.load(readByte());
         }
 
         return bytecode.read();
@@ -202,6 +222,17 @@ public class MicroVirtualMachine {
 
         return (Number) result;
     }
+
+    private boolean readBoolValue() {
+        Object result = readValue();
+
+        if (!(result instanceof Boolean)) {
+            throw new RuntimeException("Expected bool value, instead got " + result);
+        }
+
+        return (boolean) result;
+    }
+
 
     public class VMRunner implements Runnable {
 
@@ -272,6 +303,14 @@ public class MicroVirtualMachine {
                     }
                     case FETCH: {
                         iFetch();
+                        break;
+                    }
+                    case JIT: {
+                        iJIT();
+                        break;
+                    }
+                    case JIF: {
+                        iJIF();
                         break;
                     }
                     default: {

@@ -31,6 +31,8 @@ public class MicroAssembler {
         loadInstructionSet("call", CALL);    // call <SysCall> [params]
         loadInstructionSet("jump", JUMP);    // jump <loc>
         loadInstructionSet("fetch", FETCH);  // fetch <x> <reg>
+        loadInstructionSet("jit", JIT);      // jit <bool> <loc>
+        loadInstructionSet("jif", JIF);      // jif <bool> <loc>
     }
 
     private final String code;
@@ -165,6 +167,12 @@ public class MicroAssembler {
                 // Expected format: <byte> <reg>
                 bytes.add(parseByte(tokens[1]));
                 bytes.add(parseRegister(tokens[2]));
+                break;
+            case "jif":
+            case "jit":
+                // Expected format: <bool> <loc>
+                bytes.addAll(parseValueOrRegister(tokens[1]));
+                bytes.add(parseLocation(tokens[2]));
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported instruction: " + instruction);
@@ -302,7 +310,7 @@ public class MicroAssembler {
         return index;
     }
 
-    public static byte parseByte(String input) {
+    private static byte parseByte(String input) {
         input = input.trim();
 
         if (input.toLowerCase().startsWith("0x")) {

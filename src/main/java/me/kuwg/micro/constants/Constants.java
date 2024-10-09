@@ -21,6 +21,8 @@ public final class Constants extends ConstantClass {
         public static final byte JUMP = 0X0c;
         public static final byte LOC = 0x0d;
         public static final byte FETCH = 0x0e;
+        public static final byte JIT = 0x0f;
+        public static final byte JIF = 0x12;
     }
 
     public static final class TypeConstants extends ConstantClass {

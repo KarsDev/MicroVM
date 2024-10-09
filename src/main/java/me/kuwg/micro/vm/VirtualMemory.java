@@ -4,10 +4,10 @@ import static me.kuwg.micro.constants.Constants.BooleanConstants.FALSE;
 import static me.kuwg.micro.constants.Constants.BooleanConstants.TRUE;
 import static me.kuwg.micro.constants.Constants.TypeConstants.*;
 
-public class MicroMemory {
+public class VirtualMemory {
     private final byte[] memory;
 
-    public MicroMemory(int size) {
+    public VirtualMemory(int size) {
         memory = new byte[size];
     }
 

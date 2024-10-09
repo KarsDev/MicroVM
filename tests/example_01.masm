@@ -1,0 +1,20 @@
+load R0 10            ; Loads value 10 into register 0
+load R1 1             ; Loads value 1 into register 1
+sub R0 R1 R0          ; Subtracts R1 (1) to R0 (10) and sets the output to register R0
+call PRINTLN R0       ; System Call for 'PRINTLN' (0x00) and prints R0
+halt                  ; Stops the program (since we didn't provide any register or value it will exit with 0 as exit code)
+
+; instruction (0-load), register (0-R0), value declaration (1-explicit), data type (3-double), double values x8
+; 0, 0, 1, 3, 64, 36, 0, 0, 0, 0, 0, 0
+;
+; instruction (0-load), register (1-R1), value declaration (1-explicit), data type (1-byte), byte (1)
+; 0, 1, 1, 1, 1
+;
+; instruction (2-sub), value declaration (0-register), register (0-R0), value declaration (0-register), register (1-R1), register (0-R0)
+; 2, 0, 0, 0, 1, 0
+;
+; instruction (11-call), call id (0-PRINTLN), params length (1), data type (0-register), register (0-R0)
+; 11, 0, 1, 0, 0
+;
+; instruction (5-halt), value declaration (1-explicit), byte (0)
+; 5, 1, 0

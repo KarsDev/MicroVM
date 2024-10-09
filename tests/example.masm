@@ -1,0 +1,32 @@
+load R0 1           ; Loads value 1 (byte) into register R0
+LABEL_01:           ; Defines a section in code (a label) where you can jump to
+call PRINTLN R0     ; Calls System Call 'PRINTLN' with parameter R0, a register
+add R0 1 R0         ; Adds 1 to register R0 and saves the value to R0
+load R1 0           ; Loads value 0 (byte) into register R1
+sub R0 1000 R1      ; Subtracts 1000 from register R0 and saves the value to R1
+jnz R1 LABEL_01     ; Jumps to LABEL_01 if register R1's value is not zero
+halt                ; Stops the program from running with default exit code (0)
+
+; instruction (0=load), register (0=R0), value declaration (1=explicit), data type (1=byte), byte (1)
+; 0, 0, 1, 1, 1
+; 
+; instruction (13=loc), loc id (1)
+; 13, 1
+; 
+; instruction (11=call), call id (0-PRINTLN), params length (1), value declaration (0=register), register (0=R0)
+; 11, 0, 1, 0, 0
+; 
+; instruction (1=add), value type (0=register), register (0=R0), value declaration (1=explicit), data type (1=byte), byte (1), register (0=R0)
+; 1, 0, 0, 1, 1, 1, 0
+; 
+; instruction (0=load), register (1=R1), value declaration (1=explicit), data type (1=byte), byte (0)
+; 0, 1, 1, 1, 0
+; 
+; instruction (2=sub), value declaration (0=register), register (0=R0), value declaration (1=explicit), data type (2=int), int values x4, register (1=R1)
+; 2, 0, 0, 1, 2, 0, 0, 3, -24, 1, 
+; 
+; instruction (9=jnz), value declaration (0=register), register (1=R1), loc id (1)
+; 9, 0, 1, 1, 
+; 
+; instruction(5=halt), value declaration (1=explicit), data type (1=byte), byte (0)
+; 5, 1, 1, 0

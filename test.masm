@@ -1,0 +1,9 @@
+load R0 "Hello"
+load R1 " "
+load R2 "World"
+
+add R0 R1 R3
+add R3 R2 R3
+
+call PRINTLN R3
+halt

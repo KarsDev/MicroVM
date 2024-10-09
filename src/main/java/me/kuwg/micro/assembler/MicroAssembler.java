@@ -5,6 +5,8 @@ import me.kuwg.micro.syscall.SysCall;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import static me.kuwg.micro.constants.Constants.BooleanConstants.FALSE;
+import static me.kuwg.micro.constants.Constants.BooleanConstants.TRUE;
 import static me.kuwg.micro.constants.Constants.HaltConstants.*;
 import static me.kuwg.micro.constants.Constants.InstructionConstants.*;
 import static me.kuwg.micro.constants.Constants.TypeConstants.*;
@@ -258,7 +260,19 @@ public class MicroAssembler {
             for (byte b : buffer.array()) {
                 byteList.add(b);  // Add double content
             }
-        } else {
+        }
+        // Detect 'false' and save it as boolean
+        else if (value.equals("false")) {
+            byteList.add(BOOLEAN_TYPE);
+            byteList.add(FALSE);
+        }
+        // Detect 'true' and save it as boolean
+        else if (value.equals("true")) {
+            byteList.add(BOOLEAN_TYPE);
+            byteList.add(TRUE);
+        }
+        // Default type, int or byte
+        else {
             try {
                 byte b = parseByte(value);
                 byteList.add(BYTE_TYPE);  // Add byte identifier

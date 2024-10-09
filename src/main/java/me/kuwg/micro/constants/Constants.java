@@ -29,6 +29,7 @@ public final class Constants extends ConstantClass {
         public static final byte LONG_TYPE = 0x03;
         public static final byte DOUBLE_TYPE = 0x04;
         public static final byte STRING_TYPE = 0x05;
+        public static final byte BOOLEAN_TYPE = 0x06;
     }
 
     public static final class HaltConstants extends ConstantClass {
@@ -67,6 +68,11 @@ public final class Constants extends ConstantClass {
                 return bytes + " Bytes";
             }
         }
+    }
+
+    public static final class BooleanConstants extends ConstantClass {
+        public static final byte FALSE = 0x00;
+        public static final byte TRUE = 0x01;
     }
 }
 

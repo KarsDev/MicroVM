@@ -2,6 +2,7 @@ package me.kuwg.micro.bytecode;
 
 import java.nio.ByteBuffer;
 
+import static me.kuwg.micro.constants.Constants.BooleanConstants.TRUE;
 import static me.kuwg.micro.constants.Constants.TypeConstants.*;
 
 public class Bytecode {
@@ -32,6 +33,7 @@ public class Bytecode {
             case LONG_TYPE -> readLong();
             case DOUBLE_TYPE -> readDouble();
             case STRING_TYPE -> readString();
+            case BOOLEAN_TYPE -> readBoolean();
             default -> throw new IllegalArgumentException("Unknown type identifier: " + typeIdentifier);
         };
     }
@@ -81,6 +83,13 @@ public class Bytecode {
         String str = new String(bytecode, readerIndex, length); // Read string content
         readerIndex += length;
         return str;
+    }
+
+    private boolean readBoolean() {
+        if (readerIndex >= bytecode.length) {
+            throw new IndexOutOfBoundsException("End of bytecode reached while reading byte.");
+        }
+        return bytecode[readerIndex++] == TRUE;
     }
 
     public int readerIndex() {

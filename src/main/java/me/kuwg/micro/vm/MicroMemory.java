@@ -1,5 +1,7 @@
 package me.kuwg.micro.vm;
 
+import static me.kuwg.micro.constants.Constants.BooleanConstants.FALSE;
+import static me.kuwg.micro.constants.Constants.BooleanConstants.TRUE;
 import static me.kuwg.micro.constants.Constants.TypeConstants.*;
 
 public class MicroMemory {
@@ -29,6 +31,9 @@ public class MicroMemory {
             }
             case String s -> {
                 storeString(s, address);
+            }
+            case Boolean b -> {
+                storeBoolean(b, address);
             }
             default -> throw new IllegalArgumentException("Could not store " + data.getClass().getSimpleName() + ", unknown type.");
         }
@@ -83,6 +88,11 @@ public class MicroMemory {
         System.arraycopy(stringBytes, 0, memory, address + 2, stringBytes.length);
     }
 
+    private void storeBoolean(boolean b, int address) {
+        memory[address] = BOOLEAN_TYPE; // Store type identifier
+        memory[address + 1] = b ? TRUE : FALSE; // Store byte directly
+    }
+
     public Object load(int address) {
         if (address < 0 || address >= memory.length) {
             throw new IndexOutOfBoundsException("Address out of bounds: " + address);
@@ -95,6 +105,7 @@ public class MicroMemory {
             case LONG_TYPE -> loadLong(address);
             case DOUBLE_TYPE -> loadDouble(address);
             case STRING_TYPE -> loadString(address);
+            case BOOLEAN_TYPE -> loadBoolean(address);
             default -> throw new IllegalArgumentException("Unknown type identifier: " + typeIdentifier);
         };
     }
@@ -126,5 +137,9 @@ public class MicroMemory {
         byte[] stringBytes = new byte[length];
         System.arraycopy(memory, address + 2, stringBytes, 0, length); // Copy the string bytes
         return new String(stringBytes);
+    }
+
+    private boolean loadBoolean(int address) {
+        return memory[address + 1] == TRUE;
     }
 }

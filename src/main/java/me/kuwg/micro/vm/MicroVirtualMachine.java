@@ -6,7 +6,6 @@ import me.kuwg.micro.syscall.SysCall;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import static me.kuwg.micro.constants.Constants.InstructionConstants.*;
 import static me.kuwg.micro.constants.Constants.ValueDeclarationConstants.*;
@@ -44,7 +43,7 @@ public class MicroVirtualMachine {
     }
 
     private void iLoad() {
-        byte pointer = bytecode.readByte(); // register to load into
+        byte pointer = readByte(); // register to load into
         Object value = readValue();
         registers.load(value, pointer);
     }
@@ -52,28 +51,28 @@ public class MicroVirtualMachine {
     private void iAdd() {
         final Object left = readValue();
         final Object right = readValue();
-        final byte pointer = bytecode.readByte();
+        final byte pointer = readByte();
         registers.load(add(left, right), pointer);
     }
 
     private void iSub() {
         final Object left = readValue();
         final Object right = readValue();
-        final byte pointer = bytecode.readByte();
+        final byte pointer = readByte();
         registers.load(sub(left, right), pointer);
     }
 
     private void iMul() {
         final Object left = readValue();
         final Object right = readValue();
-        final byte pointer = bytecode.readByte();
+        final byte pointer = readByte();
         registers.load(mul(left, right), pointer);
     }
 
     private void iDiv() {
         final Object left = readValue();
         final Object right = readValue();
-        final byte pointer = bytecode.readByte();
+        final byte pointer = readByte();
         registers.load(div(left, right), pointer);
     }
 
@@ -85,7 +84,7 @@ public class MicroVirtualMachine {
     private void iJEZ() {
         double eq = readNumberValue().doubleValue();
 
-        byte jump = readByteValue();
+        byte jump = readByte();
 
         if (eq == 0) {
             bytecode.readerIndex(locToReaderMap.get(jump));
@@ -95,7 +94,7 @@ public class MicroVirtualMachine {
     private void iJMZ() {
         double eq = readNumberValue().doubleValue();
 
-        byte jump = readByteValue();
+        byte jump = readByte();
 
         if (eq > 0) {
             bytecode.readerIndex(locToReaderMap.get(jump));
@@ -105,7 +104,7 @@ public class MicroVirtualMachine {
     private void iJLZ() {
         double eq = readNumberValue().doubleValue();
 
-        byte jump = readByteValue();
+        byte jump = readByte();
 
         if (eq < 0) {
             bytecode.readerIndex(locToReaderMap.get(jump));
@@ -115,7 +114,7 @@ public class MicroVirtualMachine {
     private void iJNZ() {
         double eq = readNumberValue().doubleValue();
 
-        byte jump = bytecode.readByte();
+        byte jump = readByte();
 
         if (eq != 0) {
             bytecode.readerIndex(locToReaderMap.get(jump));
@@ -123,15 +122,15 @@ public class MicroVirtualMachine {
     }
 
     private void iStore() {
-        byte pointer = bytecode.readByte();
+        byte pointer = readByte();
         Object value = readValue();
         memory.store(pointer, value);
     }
 
     private void iCall() {
-        byte syscallID = bytecode.readByte();
+        byte syscallID = readByte();
         SysCall sysCall = SysCall.VALUES[syscallID];
-        byte len = bytecode.readByte();
+        byte len = readByte();
 
         sysCall.handle(this, len);
     }
@@ -142,25 +141,36 @@ public class MicroVirtualMachine {
     }
 
     private void iLoc() {
-        locToReaderMap.put(bytecode.readByte(), bytecode.readerIndex());
+        locToReaderMap.put(readByte(), bytecode.readerIndex());
     }
 
     private void iFetch() {
-        byte pointer = bytecode.readByte();
-        byte register = bytecode.readByte();
+        byte pointer = readByte();
+        byte register = readByte();
         Object result = memory.load(pointer);
         registers.load(result, register);
     }
 
-
     public Object readValue() {
-        final byte dType = bytecode.readByte();
+        final byte dType = readByte();
 
         if (dType == REGISTER) {
-            return registers.get(bytecode.readByte());
+            return registers.get(readByte());
         }
 
         return bytecode.read();
+    }
+
+    private byte readInstructionByte() {
+        try {
+            return bytecode.readByte();
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalStateException("Expected halting at the end of the file.");
+        }
+    }
+
+    private byte readByte() {
+        return bytecode.readByte();
     }
 
     public int readIntValue() {
@@ -202,7 +212,7 @@ public class MicroVirtualMachine {
         @Override
         public void run() {
             while (running) {
-                byte instruction = bytecode.readByte();
+                byte instruction = readInstructionByte();
                 switch (instruction) {
                     case LOAD: {
                         iLoad();

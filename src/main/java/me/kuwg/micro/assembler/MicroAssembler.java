@@ -5,8 +5,6 @@ import me.kuwg.micro.syscall.SysCall;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static me.kuwg.micro.constants.Constants.BooleanConstants.FALSE;
-import static me.kuwg.micro.constants.Constants.BooleanConstants.TRUE;
 import static me.kuwg.micro.constants.Constants.HaltConstants.*;
 import static me.kuwg.micro.constants.Constants.InstructionConstants.*;
 import static me.kuwg.micro.constants.Constants.TypeConstants.*;
@@ -31,8 +29,6 @@ public class MicroAssembler {
         loadInstructionSet("call", CALL);    // call <SysCall> [params]
         loadInstructionSet("jump", JUMP);    // jump <loc>
         loadInstructionSet("fetch", FETCH);  // fetch <x> <reg>
-        loadInstructionSet("jit", JIT);      // jit <bool> <loc>
-        loadInstructionSet("jif", JIF);      // jif <bool> <loc>
     }
 
     private final String code;
@@ -88,7 +84,7 @@ public class MicroAssembler {
     }
 
     private List<Byte> parseInstruction(String line) {
-        String[] tokens = splitLine(line);
+        String[] tokens = line.split("(?<=\")\\s+(?=\")|\\s+(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
         if (tokens.length == 0) {
             throw new IllegalArgumentException("Unknown instruction: \"" + line + "\"");
@@ -168,45 +164,11 @@ public class MicroAssembler {
                 bytes.add(parseByte(tokens[1]));
                 bytes.add(parseRegister(tokens[2]));
                 break;
-            case "jif":
-            case "jit":
-                // Expected format: <bool> <loc>
-                bytes.addAll(parseValueOrRegister(tokens[1]));
-                bytes.add(parseLocation(tokens[2]));
-                break;
             default:
                 throw new IllegalArgumentException("Unsupported instruction: " + instruction);
         }
 
         return bytes;
-    }
-
-    public static String[] splitLine(String input) {
-        List<String> result = new ArrayList<>();
-        StringBuilder currentToken = new StringBuilder();
-        boolean insideQuotes = false;
-
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-
-            if (c == '"') {
-                insideQuotes = !insideQuotes;
-                currentToken.append(c);
-            } else if (c == ' ' && !insideQuotes) {
-                if (!currentToken.isEmpty()) {
-                    result.add(currentToken.toString());
-                    currentToken.setLength(0);
-                }
-            } else {
-                currentToken.append(c);
-            }
-        }
-
-        if (!currentToken.isEmpty()) {
-            result.add(currentToken.toString());
-        }
-
-        return result.toArray(new String[0]);
     }
 
     private List<Byte> parseValueOrRegister(String val) {
@@ -224,8 +186,6 @@ public class MicroAssembler {
     }
 
     private byte parseRegister(String reg) {
-        // Convert register name (e.g., "R0") to byte index
-        // Assuming registers are named R0, R1, R2, etc.
         if (reg.startsWith("R")) {
             int regNum = Integer.parseInt(reg.substring(1));
             return (byte) regNum;
@@ -268,19 +228,7 @@ public class MicroAssembler {
             for (byte b : buffer.array()) {
                 byteList.add(b);  // Add double content
             }
-        }
-        // Detect 'false' and save it as boolean
-        else if (value.equals("false")) {
-            byteList.add(BOOLEAN_TYPE);
-            byteList.add(FALSE);
-        }
-        // Detect 'true' and save it as boolean
-        else if (value.equals("true")) {
-            byteList.add(BOOLEAN_TYPE);
-            byteList.add(TRUE);
-        }
-        // Default type, int or byte
-        else {
+        } else {
             try {
                 byte b = parseByte(value);
                 byteList.add(BYTE_TYPE);  // Add byte identifier
@@ -310,7 +258,7 @@ public class MicroAssembler {
         return index;
     }
 
-    private static byte parseByte(String input) {
+    public static byte parseByte(String input) {
         input = input.trim();
 
         if (input.toLowerCase().startsWith("0x")) {
